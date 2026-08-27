@@ -1,0 +1,7 @@
+INDEX VERSION 1.4+D:\LMS microservices &kafka\.metadata\.plugins\org.eclipse.wst.jsdt.core\indexes
+3719688305.index
+3639615464.index
+265306130.index
+1645538715.index
+687942119.index
+285811506.index
