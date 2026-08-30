@@ -1,4 +1,4 @@
-package com.loan_management_system_user.dto.mapper;
+package com.loan_management_system_user.mapper;
 
 
 

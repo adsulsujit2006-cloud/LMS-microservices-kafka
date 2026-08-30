@@ -8,8 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.lms_user_servicess.enums.RoleType;
-import com.lms_user_servicess.modal.User;
+import com.loan_management_system_user.enums.RoleType;
+import com.loan_management_system_user.modal.User;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
