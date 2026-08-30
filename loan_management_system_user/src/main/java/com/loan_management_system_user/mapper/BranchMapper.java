@@ -1,4 +1,4 @@
-package com.loan_management_system_user.dto.mapper;
+package com.loan_management_system_user.mapper;
 
 import org.mapstruct.Mapper;
 
@@ -9,10 +9,7 @@ import com.loan_management_system_user.modal.Branch;
 
 @Mapper(componentModel = "spring")
 public interface BranchMapper {
-
 	Branch toEntity(CreateBranchRequest request);
-
 	Branch toEntity(UpdateBranchRequest request);
-
 	BranchResponse toResponse(Branch branch);
 }
