@@ -1,3 +1,4 @@
+
 package com.loan_management_system_user.services.impl;
 
 import java.util.List;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.loan_management_system_user.dto.request.EmailRequest;
 import com.loan_management_system_user.dto.request.LoginRequest;
 import com.loan_management_system_user.dto.request.UpdateUserRequest;
 import com.loan_management_system_user.dto.request.UserRegistrationRequest;
@@ -27,379 +29,391 @@ import com.loan_management_system_user.modal.User;
 import com.loan_management_system_user.repository.BranchRepository;
 import com.loan_management_system_user.repository.RoleRepository;
 import com.loan_management_system_user.repository.UserRepository;
+import com.loan_management_system_user.services.NotificationClient;
 import com.loan_management_system_user.services.UserServices;
 import com.loan_management_system_user.util.CustomerCodeGenerator;
 
 import lombok.extern.slf4j.Slf4j;
+
 @Slf4j
 @Service
 public class UserServicesImpl implements UserServices {
 
-	/*
-	 * instance of UserRepo
-	 */
-	@Autowired
-	private UserRepository userRepository;
-	/*
-	 * instance of BranchRepo
-	 */
-	@Autowired
-	private BranchRepository branchRepository;
-	/*
-	 * instance of UserMapper
-	 */
-	@Autowired
-	private BranchMapper branchMapper;
-	@Autowired
-	private RoleRepository roleRepository;
-	@Autowired
-	private UserMapper userMapper;
-	@Autowired
-	private PasswordEncoder passwordEncoder;
-	
-//	   @Autowired
-//	    private NotificationClient notificationClient;
-	/*
-	 * This implemented method is Registor user
-	 */
-	   @Override
-	   @Transactional
-	   public UserResponse createUser(UserRegistrationRequest request) {
+    /*
+     * instance of UserRepo
+     */
+    @Autowired
+    private UserRepository userRepository;
 
-	       /*
-	        * check request null or not
-	        */
-	       if (request == null) {
-	           throw new BadRequestException(
-	                   "Please enter appropriate information.");
-	       }
+    /*
+     * instance of BranchRepo
+     */
+    @Autowired
+    private BranchRepository branchRepository;
 
-	       /*
-	        * Store original password before encoding
-	        * This password will be used only for sending email
-	        */
-	       String originalPassword = request.getPassword();
+    /*
+     * instance of UserMapper
+     */
+    @Autowired
+    private BranchMapper branchMapper;
 
-	       /*
-	        * Add log
-	        */
-	       log.info("Creating new user account with firstName {}",
-	               request.getFirstName());
+    @Autowired
+    private RoleRepository roleRepository;
 
-	       log.info("Creating new user account with middleName {}",
-	               request.getMiddleName());
+    @Autowired
+    private UserMapper userMapper;
 
-	       log.info("Creating new user account with lastName {}",
-	               request.getLastName());
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
-	       log.info("Creating new user account with dateOfBirth {}",
-	               request.getDateOfBirth());
+    /*
+     * instance of NotificationClient
+     */
+    @Autowired
+    private NotificationClient notificationClient;
 
-	       log.info("Creating new user account with gender {}",
-	               request.getGender());
+    /*
+     * This implemented method is Registor user
+     */
+    @Override
+    @Transactional
+    public UserResponse createUser(UserRegistrationRequest request) {
 
-	       /*
-	        * check user email exist or not in DB
-	        */
-	       if (userRepository.existsByEmail(request.getEmail())) {
-	           throw new DuplicateResourceException(
-	                   "Email already exists");
-	       }
+        /*
+         * check request null or not
+         */
+        if (request == null) {
+            throw new BadRequestException(
+                    "Please enter appropriate information.");
+        }
 
-	       /*
-	        * check user mobile number exist or not
-	        */
-	       if (userRepository.existsByMobileNumber(
-	               request.getMobileNumber())) {
+        /*
+         * Store original password before encoding
+         * This password will be used only for sending email
+         */
+        String originalPassword = request.getPassword();
 
-	           throw new DuplicateResourceException(
-	                   "Mobile number already exists");
-	       }
+        /*
+         * Add log
+         */
+        log.info("Creating new user account with firstName {}",
+                request.getFirstName());
 
-	       /*
-	        * check aadhaar number exist or not
-	        */
-	       if (userRepository.existsByAadhaarNumber(
-	               request.getAadhaarNumber())) {
+        log.info("Creating new user account with middleName {}",
+                request.getMiddleName());
 
-	           throw new DuplicateResourceException(
-	                   "Aadhaar number already exists");
-	       }
+        log.info("Creating new user account with lastName {}",
+                request.getLastName());
 
-	       /*
-	        * check panNumber exist or not
-	        */
-	       if (userRepository.existsByPanNumber(
-	               request.getPanNumber())) {
+        log.info("Creating new user account with dateOfBirth {}",
+                request.getDateOfBirth());
 
-	           throw new DuplicateResourceException(
-	                   "PAN number already exists");
-	       }
+        log.info("Creating new user account with gender {}",
+                request.getGender());
 
-	       /*
-	        * Not permission for REPRESENTATIVE_EXECUTIVE role
-	        */
-	       if (request.getRole() == RoleType.REPRESENTATIVE_EXECUTIVE) {
+        /*
+         * check user email exist or not in DB
+         */
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new DuplicateResourceException(
+                    "Email already exists");
+        }
 
-	           throw new BadRequestException(
-	                   "Not permission to add role");
-	       }
+        /*
+         * check user mobile number exist or not
+         */
+        if (userRepository.existsByMobileNumber(
+                request.getMobileNumber())) {
 
-	       /*
-	        * Not permission for OPERATIONS_MANAGER role
-	        */
-	       if (request.getRole() == RoleType.OPERATIONS_MANAGER) {
+            throw new DuplicateResourceException(
+                    "Mobile number already exists");
+        }
 
-	           throw new BadRequestException(
-	                   "Not permission to add role");
-	       }
+        /*
+         * check aadhaar number exist or not
+         */
+        if (userRepository.existsByAadhaarNumber(
+                request.getAadhaarNumber())) {
 
-	       /*
-	        * Not permission for CREDIT_MANAGER role
-	        */
-	       if (request.getRole() == RoleType.CREDIT_MANAGER) {
+            throw new DuplicateResourceException(
+                    "Aadhaar number already exists");
+        }
 
-	           throw new BadRequestException(
-	                   "Not permission to add role");
-	       }
+        /*
+         * check panNumber exist or not
+         */
+        if (userRepository.existsByPanNumber(
+                request.getPanNumber())) {
 
-	       /*
-	        * Not permission for AUDITOR role
-	        */
-	       if (request.getRole() == RoleType.AUDITOR) {
+            throw new DuplicateResourceException(
+                    "PAN number already exists");
+        }
 
-	           throw new BadRequestException(
-	                   "Not permission to add role");
-	       }
+        /*
+         * Not permission for REPRESENTATIVE_EXECUTIVE role
+         */
+        if (request.getRole() == RoleType.REPRESENTATIVE_EXECUTIVE) {
 
-	       /*
-	        * Not permission for COLLECTION_AGENT role
-	        */
-	       if (request.getRole() == RoleType.COLLECTION_AGENT) {
+            throw new BadRequestException(
+                    "Not permission to add role");
+        }
 
-	           throw new BadRequestException(
-	                   "Not permission to add role");
-	       }
+        /*
+         * Not permission for OPERATIONS_MANAGER role
+         */
+        if (request.getRole() == RoleType.OPERATIONS_MANAGER) {
 
-	       /*
-	        * To assign branch on user
-	        */
-	       Branch branch = branchRepository.findById(request.getBranchId())
-	               .orElseThrow(() ->
-	                       new ResourceNotFoundException(
-	                               "Branch not found"));
+            throw new BadRequestException(
+                    "Not permission to add role");
+        }
 
-	       /*
-	        * map data userMapper class
-	        */
-	       User user = userMapper.toEntity(request);
+        /*
+         * Not permission for CREDIT_MANAGER role
+         */
+        if (request.getRole() == RoleType.CREDIT_MANAGER) {
 
-	       /*
-	        * encode user password
-	        */
-	       user.setPassword(
-	               passwordEncoder.encode(originalPassword));
+            throw new BadRequestException(
+                    "Not permission to add role");
+        }
 
-	       /*
-	        * set customer code
-	        */
-	       user.setCustomerCode(
-	               CustomerCodeGenerator.generateCustomerCodeWithDate());
+        /*
+         * Not permission for AUDITOR role
+         */
+        if (request.getRole() == RoleType.AUDITOR) {
 
-	       /*
-	        * set by default active
-	        */
-	       user.setActive(true);
+            throw new BadRequestException(
+                    "Not permission to add role");
+        }
 
-	       /*
-	        * branch set for user
-	        */
-	       user.setBranch(branch);
+        /*
+         * Not permission for COLLECTION_AGENT role
+         */
+        if (request.getRole() == RoleType.COLLECTION_AGENT) {
 
-	       /*
-	        * set createdBy
-	        */
-	       user.setCreatedBy(request.getCreatedBy());
+            throw new BadRequestException(
+                    "Not permission to add role");
+        }
 
-	       /*
-	        * To assign role on user
-	        */
-	       Role role = roleRepository.findByRoleName(request.getRole())
-	               .orElseThrow(() ->
-	                       new ResourceNotFoundException(
-	                               "Role not found: " + request.getRole()));
+        /*
+         * To assign branch on user
+         */
+        Branch branch = branchRepository.findById(request.getBranchId())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Branch not found"));
 
-	       user.getRoles().add(role);
+        /*
+         * map data userMapper class
+         */
+        User user = userMapper.toEntity(request);
 
-	       /*
-	        * user data save in DB
-	        */
-	       User savedUser = userRepository.save(user);
+        /*
+         * encode user password
+         */
+        user.setPassword(
+                passwordEncoder.encode(originalPassword));
 
-	       /*
-	        * ================================
-	        * SEND EMAIL USING OPENFEIGN
-	        * ================================
-	        */
+        /*
+         * set customer code
+         */
+        user.setCustomerCode(
+                CustomerCodeGenerator.generateCustomerCodeWithDate());
 
-//	       EmailRequest emailRequest = new EmailRequest();
-//
-//	       emailRequest.setTo(savedUser.getEmail());
-//
-//	       emailRequest.setSubject(
-//	               "LMS Account Registration Successful");
-//
-//	       String emailBody =
-//	               "<html>"
-//	               + "<body style='font-family: Arial, sans-serif; "
-//	               + "background-color:#f4f6f8; padding:30px;'>"
-//
-//	               + "<div style='max-width:600px; margin:auto; "
-//	               + "background:white; padding:30px; "
-//	               + "border-radius:10px;'>"
-//
-//	               + "<h2 style='color:#1976d2;'>"
-//	               + "Welcome to Loan Management System"
-//	               + "</h2>"
-//
-//	               + "<p>Dear <b>"
-//	               + savedUser.getFirstName()
-//	               + "</b>,</p>"
-//
-//	               + "<p>"
-//	               + "Your account has been successfully registered."
-//	               + "</p>"
-//
-//	               + "<h3>Login Details</h3>"
-//
-//	               + "<table style='width:100%; "
-//	               + "border-collapse:collapse;'>"
-//
-//	               + "<tr>"
-//	               + "<td style='padding:10px; "
-//	               + "border:1px solid #ddd;'>"
-//	               + "<b>Username</b>"
-//	               + "</td>"
-//
-//	               + "<td style='padding:10px; "
-//	               + "border:1px solid #ddd;'>"
-//	               + savedUser.getCreatedBy()
-//	               + "</td>"
-//	               + "</tr>"
-//
-//	               + "<tr>"
-//	               + "<td style='padding:10px; "
-//	               + "border:1px solid #ddd;'>"
-//	               + "<b>Password</b>"
-//	               + "</td>"
-//
-//	               + "<td style='padding:10px; "
-//	               + "border:1px solid #ddd;'>"
-//	               + originalPassword
-//	               + "</td>"
-//	               + "</tr>"
-//
-//	               + "<tr>"
-//	               + "<td style='padding:10px; "
-//	               + "border:1px solid #ddd;'>"
-//	               + "<b>Customer Code</b>"
-//	               + "</td>"
-//
-//	               + "<td style='padding:10px; "
-//	               + "border:1px solid #ddd;'>"
-//	               + savedUser.getCustomerCode()
-//	               + "</td>"
-//	               + "</tr>"
-//
-//	               + "</table>"
-//
-//	               + "<p style='margin-top:20px;'>"
-//	               + "Please keep your login credentials secure."
-//	               + "</p>"
-//
-//	               + "<p>"
-//	               + "Regards,<br>"
-//	               + "<b>LMS Team</b>"
-//	               + "</p>"
-//
-//	               + "</div>"
-//
-//	               + "</body>"
-//	               + "</html>";
-//
-//	       emailRequest.setBody(emailBody);
-//
-//	       /*
-//	        * Call Notification Microservice
-//	        * using OpenFeign
-//	        */
-//	       notificationClient.sendMail(emailRequest);
+        /*
+         * set by default active
+         */
+        user.setActive(true);
 
-	       return userMapper.toResponse(savedUser);
-	   }
-	/*
-	 * This implemented method is get user Details by using id 
-	 */
+        /*
+         * branch set for user
+         */
+        user.setBranch(branch);
 
-	@Override
-	public UserResponse updateUser(Long id, @Valid UpdateUserRequest request) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+        /*
+         * set createdBy
+         */
+        user.setCreatedBy(request.getCreatedBy());
 
-	@Override
-	public UserResponse getUserById(Long id) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+        /*
+         * To assign role on user
+         */
+        Role role = roleRepository.findByRoleName(request.getRole())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Role not found: " + request.getRole()));
 
-	@Override
-	public UserResponse getUserByEmail(String email) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+        user.getRoles().add(role);
 
-	@Override
-	public UserResponse getUserByMobail(String mobaile) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+        /*
+         * user data save in DB
+         */
+        User savedUser = userRepository.save(user);
 
-	@Override
-	public UserResponse getUserByAdharNo(String aadhaarNumber) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+        /*
+         * ================================
+         * SEND EMAIL USING OPENFEIGN
+         * ================================
+         */
 
-	@Override
-	public List<UserResponse> getAllUsers() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+        EmailRequest emailRequest = EmailRequest.builder()
+                .to(savedUser.getEmail())
+                .subject("LMS Account Registration Successful")
+                .body(
+                        "<html>"
+                        + "<body style='font-family: Arial, sans-serif; "
+                        + "background-color:#f4f6f8; padding:30px;'>"
 
-	@Override
-	public ApiResponse deleteUser(Long id) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+                        + "<div style='max-width:600px; margin:auto; "
+                        + "background:white; padding:30px; "
+                        + "border-radius:10px;'>"
 
-	@Override
-	public ApiResponse activateUser(Long id) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+                        + "<h2 style='color:#1976d2;'>"
+                        + "Welcome to Loan Management System"
+                        + "</h2>"
 
-	@Override
-	public ApiResponse deActivateUser(Long id) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+                        + "<p>Dear <b>"
+                        + savedUser.getFirstName()
+                        + "</b>,</p>"
 
-	@Override
-	public LoginResponse login(LoginRequest request) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+                        + "<p>"
+                        + "Your account has been successfully registered."
+                        + "</p>"
+
+                        + "<h3>Login Details</h3>"
+
+                        + "<table style='width:100%; "
+                        + "border-collapse:collapse;'>"
+
+                        + "<tr>"
+                        + "<td style='padding:10px; "
+                        + "border:1px solid #ddd;'>"
+                        + "<b>Username</b>"
+                        + "</td>"
+
+                        + "<td style='padding:10px; "
+                        + "border:1px solid #ddd;'>"
+                        + savedUser.getCreatedBy()
+                        + "</td>"
+                        + "</tr>"
+
+                        + "<tr>"
+                        + "<td style='padding:10px; "
+                        + "border:1px solid #ddd;'>"
+                        + "<b>Password</b>"
+                        + "</td>"
+
+                        + "<td style='padding:10px; "
+                        + "border:1px solid #ddd;'>"
+                        + originalPassword
+                        + "</td>"
+                        + "</tr>"
+
+                        + "<tr>"
+                        + "<td style='padding:10px; "
+                        + "border:1px solid #ddd;'>"
+                        + "<b>Customer Code</b>"
+                        + "</td>"
+
+                        + "<td style='padding:10px; "
+                        + "border:1px solid #ddd;'>"
+                        + savedUser.getCustomerCode()
+                        + "</td>"
+                        + "</tr>"
+
+                        + "</table>"
+
+                        + "<p style='margin-top:20px;'>"
+                        + "Please keep your login credentials secure."
+                        + "</p>"
+
+                        + "<p>"
+                        + "Regards,<br>"
+                        + "<b>LMS Team</b>"
+                        + "</p>"
+
+                        + "</div>"
+
+                        + "</body>"
+                        + "</html>"
+                )
+                .build();
+
+        /*
+         * Call Notification Microservice
+         * using OpenFeign
+         */
+        String emailResponse = notificationClient.sendMail(emailRequest);
+
+        log.info("Notification Service response: {}",
+                emailResponse);
+
+        return userMapper.toResponse(savedUser);
+    }
+
+    /*
+     * This implemented method is get user Details by using id
+     */
+
+    @Override
+    public UserResponse updateUser(Long id,
+            @Valid UpdateUserRequest request) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public UserResponse getUserById(Long id) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public UserResponse getUserByEmail(String email) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public UserResponse getUserByMobail(String mobaile) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public UserResponse getUserByAdharNo(String aadhaarNumber) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<UserResponse> getAllUsers() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public ApiResponse deleteUser(Long id) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public ApiResponse activateUser(Long id) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public ApiResponse deActivateUser(Long id) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public LoginResponse login(LoginRequest request) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
 }
 
