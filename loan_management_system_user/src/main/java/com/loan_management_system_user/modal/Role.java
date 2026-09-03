@@ -1,3 +1,4 @@
+
 package com.loan_management_system_user.modal;
 
 import java.time.LocalDateTime;
@@ -48,7 +49,7 @@ public class Role {
     private String description;
 
     @Default
-    @Column(name = "is_active")
+    @Column(name = "is_active", nullable = false)
     private Boolean active = true;
 
     @CreationTimestamp
@@ -69,3 +70,4 @@ public class Role {
     private Set<Permission> permissions = new HashSet<>();
 
 }
+

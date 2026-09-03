@@ -9,7 +9,10 @@ import com.loan_management_system_user.modal.Branch;
 
 @Mapper(componentModel = "spring")
 public interface BranchMapper {
-	Branch toEntity(CreateBranchRequest request);
-	Branch toEntity(UpdateBranchRequest request);
-	BranchResponse toResponse(Branch branch);
+
+    Branch toEntity(CreateBranchRequest request);
+
+    Branch toEntity(UpdateBranchRequest request);
+
+    BranchResponse toResponse(Branch branch);
 }

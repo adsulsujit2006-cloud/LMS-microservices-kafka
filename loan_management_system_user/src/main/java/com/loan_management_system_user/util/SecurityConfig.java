@@ -51,6 +51,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             ).permitAll()
 
             // =========================
+            // Role APIs
+            // =========================
+            .antMatchers(
+                "/api/v1/role",
+                "/api/v1/role/**"
+            ).permitAll()
+
+            // =========================
             // Swagger
             // =========================
             .antMatchers(
@@ -81,4 +89,3 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .formLogin().disable();
     }
 }
-
