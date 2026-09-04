@@ -255,97 +255,112 @@ public class UserServicesImpl implements UserServices {
          * ================================
          */
 
-        EmailRequest emailRequest = EmailRequest.builder()
-                .to(savedUser.getEmail())
-                .subject("LMS Account Registration Successful")
-                .body(
-                        "<html>"
-                        + "<body style='font-family: Arial, sans-serif; "
-                        + "background-color:#f4f6f8; padding:30px;'>"
+        try {
 
-                        + "<div style='max-width:600px; margin:auto; "
-                        + "background:white; padding:30px; "
-                        + "border-radius:10px;'>"
+            EmailRequest emailRequest = EmailRequest.builder()
+                    .to(savedUser.getEmail())
+                    .subject("LMS Account Registration Successful")
+                    .body(
+                            "<html>"
+                            + "<body style='font-family: Arial, sans-serif; "
+                            + "background-color:#f4f6f8; padding:30px;'>"
 
-                        + "<h2 style='color:#1976d2;'>"
-                        + "Welcome to Loan Management System"
-                        + "</h2>"
+                            + "<div style='max-width:600px; margin:auto; "
+                            + "background:white; padding:30px; "
+                            + "border-radius:10px;'>"
 
-                        + "<p>Dear <b>"
-                        + savedUser.getFirstName()
-                        + "</b>,</p>"
+                            + "<h2 style='color:#1976d2;'>"
+                            + "Welcome to Loan Management System"
+                            + "</h2>"
 
-                        + "<p>"
-                        + "Your account has been successfully registered."
-                        + "</p>"
+                            + "<p>Dear <b>"
+                            + savedUser.getFirstName()
+                            + "</b>,</p>"
 
-                        + "<h3>Login Details</h3>"
+                            + "<p>"
+                            + "Your account has been successfully registered."
+                            + "</p>"
 
-                        + "<table style='width:100%; "
-                        + "border-collapse:collapse;'>"
+                            + "<h3>Login Details</h3>"
 
-                        + "<tr>"
-                        + "<td style='padding:10px; "
-                        + "border:1px solid #ddd;'>"
-                        + "<b>Username</b>"
-                        + "</td>"
+                            + "<table style='width:100%; "
+                            + "border-collapse:collapse;'>"
 
-                        + "<td style='padding:10px; "
-                        + "border:1px solid #ddd;'>"
-                        + savedUser.getCreatedBy()
-                        + "</td>"
-                        + "</tr>"
+                            + "<tr>"
+                            + "<td style='padding:10px; "
+                            + "border:1px solid #ddd;'>"
+                            + "<b>Username</b>"
+                            + "</td>"
 
-                        + "<tr>"
-                        + "<td style='padding:10px; "
-                        + "border:1px solid #ddd;'>"
-                        + "<b>Password</b>"
-                        + "</td>"
+                            + "<td style='padding:10px; "
+                            + "border:1px solid #ddd;'>"
+                            + savedUser.getCreatedBy()
+                            + "</td>"
+                            + "</tr>"
 
-                        + "<td style='padding:10px; "
-                        + "border:1px solid #ddd;'>"
-                        + originalPassword
-                        + "</td>"
-                        + "</tr>"
+                            + "<tr>"
+                            + "<td style='padding:10px; "
+                            + "border:1px solid #ddd;'>"
+                            + "<b>Password</b>"
+                            + "</td>"
 
-                        + "<tr>"
-                        + "<td style='padding:10px; "
-                        + "border:1px solid #ddd;'>"
-                        + "<b>Customer Code</b>"
-                        + "</td>"
+                            + "<td style='padding:10px; "
+                            + "border:1px solid #ddd;'>"
+                            + originalPassword
+                            + "</td>"
+                            + "</tr>"
 
-                        + "<td style='padding:10px; "
-                        + "border:1px solid #ddd;'>"
-                        + savedUser.getCustomerCode()
-                        + "</td>"
-                        + "</tr>"
+                            + "<tr>"
+                            + "<td style='padding:10px; "
+                            + "border:1px solid #ddd;'>"
+                            + "<b>Customer Code</b>"
+                            + "</td>"
 
-                        + "</table>"
+                            + "<td style='padding:10px; "
+                            + "border:1px solid #ddd;'>"
+                            + savedUser.getCustomerCode()
+                            + "</td>"
+                            + "</tr>"
 
-                        + "<p style='margin-top:20px;'>"
-                        + "Please keep your login credentials secure."
-                        + "</p>"
+                            + "</table>"
 
-                        + "<p>"
-                        + "Regards,<br>"
-                        + "<b>LMS Team</b>"
-                        + "</p>"
+                            + "<p style='margin-top:20px;'>"
+                            + "Please keep your login credentials secure."
+                            + "</p>"
 
-                        + "</div>"
+                            + "<p>"
+                            + "Regards,<br>"
+                            + "<b>LMS Team</b>"
+                            + "</p>"
 
-                        + "</body>"
-                        + "</html>"
-                )
-                .build();
+                            + "</div>"
 
-        /*
-         * Call Notification Microservice
-         * using OpenFeign
-         */
-        String emailResponse = notificationClient.sendMail(emailRequest);
+                            + "</body>"
+                            + "</html>"
+                    )
+                    .build();
 
-        log.info("Notification Service response: {}",
-                emailResponse);
+            /*
+             * Call Notification Microservice
+             * using OpenFeign
+             */
+            String emailResponse =
+                    notificationClient.sendMail(emailRequest);
+
+            log.info("Notification Service response: {}",
+                    emailResponse);
+
+        } catch (Exception e) {
+
+            /*
+             * User is already saved.
+             * Do not fail registration if Notification Service
+             * is temporarily unavailable.
+             */
+            log.error(
+                    "User created successfully, but email could not be sent: {}",
+                    e.getMessage());
+        }
 
         return userMapper.toResponse(savedUser);
     }
@@ -416,4 +431,3 @@ public class UserServicesImpl implements UserServices {
     }
 
 }
-
