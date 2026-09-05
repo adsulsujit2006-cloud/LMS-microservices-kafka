@@ -3,12 +3,12 @@ package com.loan_management_system_user.services.impl;
 
 import java.util.List;
 
-import javax.transaction.Transactional;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.loan_management_system_user.dto.request.EmailRequest;
 import com.loan_management_system_user.dto.request.LoginRequest;
@@ -365,21 +365,39 @@ public class UserServicesImpl implements UserServices {
         return userMapper.toResponse(savedUser);
     }
 
-    /*
-     * This implemented method is get user Details by using id
-     */
 
     @Override
-    public UserResponse updateUser(Long id,
-            @Valid UpdateUserRequest request) {
-        // TODO Auto-generated method stub
+  
+    public UserResponse updateUser(Long id, @Valid UpdateUserRequest request) {
+       
+
         return null;
     }
 
+    /*
+     * This implemented method is get user Details by using id
+     */
     @Override
+    /*
+     * Add @Transactional annotation to solve lazy loading problem
+     */
+    @Transactional(readOnly = true)
     public UserResponse getUserById(Long id) {
-        // TODO Auto-generated method stub
-        return null;
+    	 /*
+         * Add log
+         */
+        log.info("Get user details by using user id {}", id);
+
+        /*
+         * find user data in DB
+         */
+        User user = userRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "User not found for given id: " + id));
+
+        return userMapper.toResponse(user);
+        
     }
 
     @Override
