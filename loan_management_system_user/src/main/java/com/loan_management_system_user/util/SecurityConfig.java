@@ -1,4 +1,3 @@
-
 package com.loan_management_system_user.util;
 
 import org.springframework.context.annotation.Configuration;
@@ -24,7 +23,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             // =========================
             .antMatchers(
                 "/api/v1/user/login",
-                "/api/v1/user/register"
+                "/api/v1/user/register",
+                "/api/v1/user/**"
             ).permitAll()
 
             // =========================

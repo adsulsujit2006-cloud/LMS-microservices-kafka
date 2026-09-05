@@ -2,7 +2,6 @@ package com.loan_management_system_user.controller;
 
 import javax.validation.Valid;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,26 +24,31 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class UserController {
 
-	@Autowired
-	private final UserServices userServices;
+    private final UserServices userServices;
 
-	/*
-	 * REST API : Register bank branch with required details
-	 */
-	@PostMapping("/register")
-	public ResponseEntity<UserResponse> createUser(@Valid @RequestBody UserRegistrationRequest request){
-		log.info("REST Request : create user");
-		UserResponse response = userServices.createUser(request);
-		return ResponseEntity.status(HttpStatus.CREATED).body(response);
-	}
+    /*
+     * REST API : Register user with required details
+     */
+    @PostMapping("/register")
+    public ResponseEntity<UserResponse> createUser(
+            @Valid @RequestBody UserRegistrationRequest request) {
 
-	/*
-	 * REST API : Get the details of a user using its user ID
-	 */
-	@GetMapping("/{id}")
-	public ResponseEntity<UserResponse> getUserById(@PathVariable Long id){
-		log.info("Rest Request : Get user by id {}", id);
-		return ResponseEntity.ok(userServices.getUserById(id));
-	}
+        log.info("REST Request : create user");
+
+        UserResponse response = userServices.createUser(request);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    /*
+     * REST API : Get the details of a user using its user ID
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<UserResponse> getUserById(
+            @PathVariable Long id) {
+
+        log.info("REST Request : Get user by id {}", id);
+
+        return ResponseEntity.ok(userServices.getUserById(id));
+    }
 }
-
