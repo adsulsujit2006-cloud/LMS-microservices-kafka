@@ -1,0 +1,18 @@
+package com.loan_management_system_user.exception;
+import java.time.LocalDateTime;
+import java.util.List;
+
+import lombok.Builder;
+import lombok.Data;
+
+@Data
+@Builder
+public class ErrorResponse {
+	private LocalDateTime timestmp;
+	private int status;
+	private String error;
+	private String message;
+	private String path;
+	private List<String> validationerror;
+
+}

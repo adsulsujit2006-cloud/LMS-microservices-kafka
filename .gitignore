@@ -1,1 +1,12 @@
 .metadata/
+
+# Eclipse / STS
+.classpath
+.project
+.settings/
+
+# Maven
+target/
+
+# Spring Boot
+HELP.md
