@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.loan_management_system_notifications.LoanManagementSystemNotificationsApplicationTests
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 7.046 s - in com.loan_management_system_notifications.LoanManagementSystemNotificationsApplicationTests
