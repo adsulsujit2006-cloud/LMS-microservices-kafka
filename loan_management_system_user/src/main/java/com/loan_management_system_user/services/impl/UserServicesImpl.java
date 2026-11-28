@@ -2,6 +2,7 @@
 package com.loan_management_system_user.services.impl;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -401,15 +402,28 @@ public class UserServicesImpl implements UserServices {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserResponse getUserByEmail(String email) {
-        // TODO Auto-generated method stub
-        return null;
+
+        log.info("User details by using email : {}", email);
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "User not found for given email : " + email));
+
+        return userMapper.toResponse(user);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserResponse getUserByMobail(String mobaile) {
-        // TODO Auto-generated method stub
-        return null;
+        log.info("User details by using mobaile : {}", mobaile);
+
+        User user = userRepository.findByMobileNumber(mobaile)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "User not found for given mobaile : " + mobaile));
+
+        return userMapper.toResponse(user);
     }
 
     @Override
