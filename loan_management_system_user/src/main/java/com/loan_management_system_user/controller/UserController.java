@@ -4,12 +4,7 @@ import javax.validation.Valid;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.loan_management_system_user.dto.request.UserRegistrationRequest;
 import com.loan_management_system_user.dto.responce.UserResponse;
@@ -51,4 +46,23 @@ public class UserController {
 
         return ResponseEntity.ok(userServices.getUserById(id));
     }
+    /*
+    REST API : Get the details of user its user email
+     */
+    @GetMapping("/email")
+    public ResponseEntity<UserResponse> getUserByemail(
+            @RequestParam String email){
+    log.info("REST Request : Get user by email {}",email);
+        return ResponseEntity.ok(userServices.getUserByEmail(email));
+    }
+    /*
+   REST API : Get the details of user its user mobaile
+    */
+    @GetMapping("/mobaile")
+    public ResponseEntity<UserResponse> getUserByMobaile(
+            @RequestParam String mobaile){
+        log.info("REST Request : Get user by mobaile {}",mobaile);
+        return ResponseEntity.ok(userServices.getUserByMobail(mobaile));
+    }
+
 }
